@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wdth,wght@75..125,300..700&family=Inconsolata:wght@200..900&display=swap');
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: all;
+}
+
+* {
+  font-family: "Fredoka", "Helvetica", sans-serif;
+  scroll-behavior: smooth;
+}
+
+@keyframes softPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+  }
+}
+
+.animate-soft-pulse {
+  animation: softPulse 2.5s ease-in-out infinite;
+}
