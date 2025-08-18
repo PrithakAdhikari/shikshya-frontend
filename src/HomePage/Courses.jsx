@@ -17,12 +17,15 @@ const Courses = () => {
   const { authAxios } = useAuth();
   
   const [ courses, setCourses ] = useState([]);
+  const [ loading, setLoading ] = useState(false);
 
   useEffect(() => {
     const getCourses = async () => {
+      setLoading(true);
       const response = await authAxios.get(`${API_URL}api/courses?limit=4`);
       
       setCourses(response.data.data.courses);
+      setLoading(false);
     }
 
     getCourses();
@@ -51,21 +54,29 @@ const Courses = () => {
 
       {/* Course Cards */}
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-          {courses.map((course, key) => (
-            <Card
-              key={key}
-              publicId={course.publicId}
-              url={course.thumbnail}
-              title={course.title}
-              desc={course.desc}
-              views={course.views}
-              instructor={course.instructor}
-              liked={course.liked}
-              likes={course.likes}
-            />
-          ))}
-        </div>
+      <div className="container mx-auto px-4">
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <button className="btn btn-square loading"></button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+            {courses.map((course, key) => (
+              <Card
+                key={key}
+                publicId={course.publicId}
+                url={course.thumbnail}
+                title={course.title}
+                desc={course.desc}
+                views={course.views}
+                instructor={course.instructor}
+                liked={course.liked}
+                likes={course.likes}
+              />
+            ))}
+          </div>
+        )}
+      </div>
       </div>
     </div>
   );
