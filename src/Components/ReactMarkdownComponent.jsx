@@ -1,9 +1,27 @@
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { visit } from "unist-util-visit";
+
+const customSchema = {
+  ...defaultSchema,
+  tagNames: [...(defaultSchema.tagNames || []), "iframe", "video", "source"],
+  attributes: {
+    ...defaultSchema.attributes,
+    iframe: [
+      ["src"],
+      ["width"],
+      ["height"],
+      ["frameborder"],
+      ["allow"],
+      ["allowfullscreen"],
+    ],
+    video: [["src"], ["controls"], ["width"], ["height"]],
+    source: [["src"], ["type"]],
+  },
+};
 
 
 function remarkUnderline() {
@@ -45,7 +63,10 @@ function remarkUnderline() {
 const ReactMarkdownComponent = ({ md_text }) => (
     <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkUnderline]}
-        rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHighlight]}
+        rehypePlugins={[rehypeRaw, 
+            rehypeHighlight, 
+            [rehypeSanitize, customSchema]
+        ]}
         components={{
             a: (props) => (
                 <a
@@ -218,6 +239,13 @@ const ReactMarkdownComponent = ({ md_text }) => (
             underline: ({ children }) => (
                 <span className="underline">{children}</span>
             ),
+            video: ({ node }) => (
+                <video
+                    src={node.url}
+                    controls
+                    className="rounded-2xl shadow-md my-4 w-full max-w-2xl"
+                />
+                ),
         }}
     >
         {md_text || ""}

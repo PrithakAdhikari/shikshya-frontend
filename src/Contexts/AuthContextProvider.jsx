@@ -122,17 +122,21 @@ export const AuthProvider = ({ children }) => {
   }, [authAxios, logout]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        register,
-        logout,
-        authAxios,
-        isAuthenticated,
-      }}
-    >
-      {!loading && children}
-    </AuthContext.Provider>
+    loading ? (<div className="flex h-[100vh] items-center justify-center">
+        <button className="btn btn-square loading"></button>
+      </div>) : (
+      <AuthContext.Provider
+        value={{
+          user,
+          login,
+          register,
+          logout,
+          authAxios,
+          isAuthenticated,
+        }}
+      >
+        {children}
+      </AuthContext.Provider>
+    )
   );
 };
