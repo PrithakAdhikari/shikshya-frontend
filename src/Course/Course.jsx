@@ -14,8 +14,9 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const CoursePage = ({ course }) => { 
   const [activeIndex, setActiveIndex] = useState(0);
-  const [likesCount, setLikesCount] = useState(course.likes || 0);
-  const [liked, setLiked] = useState(course.liked || false);
+  const [likesCount, setLikesCount] = useState(() => course.likes || 0);
+  const [liked, setLiked] = useState(() => course.liked || false);
+
   const [menuOpen, setMenuOpen] = useState(false);
 
   const { isDark } = useTheme();
@@ -34,28 +35,40 @@ const CoursePage = ({ course }) => {
       return;
     }
 
+    // Optimistic update
+    const prevLiked = liked;
+    const prevLikesCount = likesCount;
+
+    const newLiked = !liked;
+    const newLikesCount = newLiked
+      ? prevLikesCount + 1
+      : Math.max(prevLikesCount - 1, 0);
+
+    setLiked(newLiked);
+    setLikesCount(newLikesCount);
+
     try {
-      const url = liked
+      const url = prevLiked
         ? `${API_URL}api/courses/decrease-likes?c=${course.publicId}`
         : `${API_URL}api/courses/increase-likes?c=${course.publicId}`;
 
       const response = await authAxios.patch(url);
 
       if (response.status === 200) {
-        // Update local state with returned likes count if provided
         if (response.data.likes !== undefined) {
-          setLikesCount(response.data.likes);
-        } else {
-          setLikesCount(prev => liked ? Math.max(prev - 1, 0) : prev + 1);
+          setLikesCount(response.data.likes); // sync with backend count
         }
-        setLiked(!liked);
       } else {
-        toast.error("Something went wrong.");
+        throw new Error("Non-200 response");
       }
     } catch (error) {
+      // Rollback on error
+      setLiked(prevLiked);
+      setLikesCount(prevLikesCount);
       toast.error(error.response?.data?.error || "Failed to update like status.");
     }
   };
+
 
   // Function to get or create anonymous user ID
   const getOrCreateAnonymousId = () => {
